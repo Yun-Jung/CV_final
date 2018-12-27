@@ -3,9 +3,11 @@ import os
 
 import torch
 from torch.utils.data import DataLoader
+from torchvision.transforms import transforms
 from tqdm import tqdm
 
 from dataset import Dataset
+from torchvision import datasets
 from model import Model
 
 
@@ -15,9 +17,15 @@ def _eval(path_to_checkpoint: str, path_to_data_dir: str, path_to_results_dir: s
     # TODO: CODE BEGIN
     #raise NotImplementedError
     # dataset = XXX
-    dataset = Dataset(path_to_data_dir, Dataset.Mode.TEST)
+    # dataset = Dataset(path_to_data_dir, Dataset.Mode.TEST)
+    data_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor()
+    ])
+    dataset = datasets.ImageFolder(
+        root='data/processed', transform=data_transform)
     # dataloader = XXX
-    dataloader = DataLoader(dataset, batch_size=100, shuffle=False)
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
     # TODO: CODE END
 
     # TODO: CODE BEGIN
@@ -33,7 +41,7 @@ def _eval(path_to_checkpoint: str, path_to_data_dir: str, path_to_results_dir: s
     print('Start evaluating')
 
     with torch.no_grad():
-        for batch_index, (images, labels) in enumerate(tqdm(dataloader)):
+        for batch_index, (images, labels) in enumerate(dataloader):
             images = images.cuda()
             labels = labels.cuda()
 
@@ -53,9 +61,12 @@ def _eval(path_to_checkpoint: str, path_to_data_dir: str, path_to_results_dir: s
 if __name__ == '__main__':
     def main():
         parser = argparse.ArgumentParser()
-        parser.add_argument('checkpoint', type=str, help='path to evaluate checkpoint, e.g.: ./checkpoints/model-100.pth')
-        parser.add_argument('-d', '--data_dir', default='./data', help='path to data directory')
-        parser.add_argument('-r', '--results_dir', default='./results', help='path to results directory')
+        parser.add_argument(
+            'checkpoint', type=str, help='path to evaluate checkpoint, e.g.: ./checkpoints/model-100.pth')
+        parser.add_argument('-d', '--data_dir',
+                            default='./data', help='path to data directory')
+        parser.add_argument(
+            '-r', '--results_dir', default='./results', help='path to results directory')
         args = parser.parse_args()
 
         path_to_checkpoint = args.checkpoint

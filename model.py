@@ -14,14 +14,16 @@ class Bottleneck(nn.Module):
     def __init__(self, in_planes, growth_rate):
         super(Bottleneck, self).__init__()
         self.bn1 = nn.BatchNorm2d(in_planes)
-        self.conv1 = nn.Conv2d(in_planes, 4*growth_rate, kernel_size=1, bias=False)
+        self.conv1 = nn.Conv2d(in_planes, 4*growth_rate,
+                               kernel_size=1, bias=False)
         self.bn2 = nn.BatchNorm2d(4*growth_rate)
-        self.conv2 = nn.Conv2d(4*growth_rate, growth_rate, kernel_size=3, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(4*growth_rate, growth_rate,
+                               kernel_size=3, padding=1, bias=False)
 
     def forward(self, x):
-        out = self.conv1(F.relu(self.bn1(x), inplace = True))
-        out = self.conv2(F.relu(self.bn2(out), inplace = True))
-        out = torch.cat([out,x], 1)
+        out = self.conv1(F.relu(self.bn1(x), inplace=True))
+        out = self.conv2(F.relu(self.bn2(out), inplace=True))
+        out = torch.cat([out, x], 1)
         return out
 
 
@@ -32,18 +34,19 @@ class Transition(nn.Module):
         self.conv = nn.Conv2d(in_planes, out_planes, kernel_size=1, bias=False)
 
     def forward(self, x):
-        out = self.conv(F.relu(self.bn(x), inplace = True))
+        out = self.conv(F.relu(self.bn(x), inplace=True))
         out = F.avg_pool2d(out, 2)
         return out
 
 
 class Model(nn.Module):
-    def __init__(self, block = Bottleneck, nblocks = [6,12,32,32], growth_rate=32, reduction=0.5, num_classes=9):
+    def __init__(self, block=Bottleneck, nblocks=[6, 12, 32, 32], growth_rate=32, reduction=0.5, num_classes=9):
         super(Model, self).__init__()
         self.growth_rate = growth_rate
 
         num_planes = 2*growth_rate
-        self.conv1 = nn.Conv2d(3, num_planes, kernel_size=3, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(
+            3, num_planes, kernel_size=3, padding=1, bias=False)
 
         self.dense1 = self._make_dense_layers(block, num_planes, nblocks[0])
         num_planes += nblocks[0]*growth_rate
@@ -77,12 +80,15 @@ class Model(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        # import pdb
+        # pdb.set_trace()
         out = self.conv1(x)
         out = self.trans1(self.dense1(out))
         out = self.trans2(self.dense2(out))
         out = self.trans3(self.dense3(out))
         out = self.dense4(out)
-        out = F.avg_pool2d(F.relu(self.bn(out), inplace = True), 4)
+        out = F.relu(self.bn(out), inplace=True)
+        out = F.adaptive_avg_pool2d(out, (1, 1))
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
@@ -96,10 +102,10 @@ class Model(nn.Module):
         # TODO: CODE END
 
     def save(self, path_to_checkpoints_dir: str, step: int) -> str:
-            path_to_checkpoint = os.path.join(path_to_checkpoints_dir,
-                                              'model-{:s}-{:d}.pth'.format(time.strftime('%Y%m%d%H%M'), step))
-            torch.save(self.state_dict(), path_to_checkpoint)
-            return path_to_checkpoint
+        path_to_checkpoint = os.path.join(path_to_checkpoints_dir,
+                                          'model-{:s}-{:d}.pth'.format(time.strftime('%Y%m%d%H%M'), step))
+        torch.save(self.state_dict(), path_to_checkpoint)
+        return path_to_checkpoint
 
     def load(self, path_to_checkpoint: str) -> 'Model':
         self.load_state_dict(torch.load(path_to_checkpoint))
