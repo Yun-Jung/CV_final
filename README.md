@@ -22,4 +22,3 @@
     ```
     $ python infer.py ./images/dog.jpg -c=./checkpoints/model-100.pth
     ```
-# CV_final
