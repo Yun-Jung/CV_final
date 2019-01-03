@@ -35,7 +35,9 @@ def _train(path_to_data_dir: str, path_to_checkpoints_dir: str):
     # dataset = XXX
     #dataset = Dataset(path_to_data_dir, mode=Dataset.Mode.TRAIN)
     data_transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.RandomRotation(20),
+        transforms.Resize((250, 250)),
+        transforms.CenterCrop((224, 224)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor()
         # transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -60,9 +62,9 @@ def _train(path_to_data_dir: str, path_to_checkpoints_dir: str):
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     # TODO: CODE END
 
-    num_steps_to_display = 20
-    num_steps_to_snapshot = 1000
-    num_steps_to_finish = 10000
+    num_steps_to_display = 50
+    num_steps_to_snapshot = 5000
+    num_steps_to_finish = 30000
 
     step = 0
     time_checkpoint = time.time()
@@ -73,6 +75,7 @@ def _train(path_to_data_dir: str, path_to_checkpoints_dir: str):
 
     while not should_stop:
         for batch_idx, (images, labels) in enumerate(dataloader):
+
             images = images.cuda()
             labels = labels.cuda()
 

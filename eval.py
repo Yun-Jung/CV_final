@@ -19,7 +19,8 @@ def _eval(path_to_checkpoint: str, path_to_data_dir: str, path_to_results_dir: s
     # dataset = XXX
     # dataset = Dataset(path_to_data_dir, Dataset.Mode.TEST)
     data_transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((250, 250)),
+        transforms.CenterCrop((224, 224)),
         transforms.ToTensor()
     ])
     dataset = datasets.ImageFolder(
