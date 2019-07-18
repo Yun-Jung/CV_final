@@ -22,12 +22,8 @@ After preprocessing, we use ImageFolder to load data and automatically classify 
 * Result
 ![](https://i.imgur.com/g5yVUKy.png)
 
-
-
-* Confusion matrix
+* Confusion Matrix
 ![](https://i.imgur.com/auSOkC4.png)
-
-
 
 ## Requirements
 
